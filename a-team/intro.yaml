@@ -17,6 +17,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: silly-demo-db-password
+  namespace: a-team
 data:
   password: cG9zdGdyZXM=
 ---
