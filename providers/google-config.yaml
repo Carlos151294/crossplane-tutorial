@@ -1,10 +1,10 @@
 ---
-apiVersion: gcp.upbound.io/v1beta1
-kind: ProviderConfig
+apiVersion: gcp.m.upbound.io/v1beta1
+kind: ClusterProviderConfig
 metadata:
   name: default
 spec:
-  projectID: dot-20241001225546
+  projectID: dot-20260207210133
   credentials:
     source: Secret
     secretRef:
