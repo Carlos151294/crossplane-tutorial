@@ -48,13 +48,34 @@ git push
 COUNTER=$(kubectl get managed --no-headers | grep -v database \
 	| grep -v object | grep -v release | wc -l)
 
-while [ $COUNTER -ne 0 ]; do
-	echo "$COUNTER resources still exist. Waiting for them to be deleted..."
+MAX_WAIT=20  # Maximum number of iterations (20 * 30s = 10 minutes)
+ITERATION=0
+
+while [ $COUNTER -ne 0 ] && [ $ITERATION -lt $MAX_WAIT ]; do
+	echo "$COUNTER resources still exist. Waiting for them to be deleted... (iteration $((ITERATION + 1))/$MAX_WAIT)"
+	
+	# Check for GCP clusters with deletion protection and disable it
+	kubectl get managed -o name | grep "cluster.container.gcp.upbound.io" | while read resource; do
+		DEL_PROT=$(kubectl get "$resource" -o jsonpath='{.spec.forProvider.deletionProtection}' 2>/dev/null)
+		if [ "$DEL_PROT" = "true" ]; then
+			echo "Disabling deletion protection on $resource..."
+			kubectl patch "$resource" -p '{"spec":{"forProvider":{"deletionProtection":false}}}' --type=merge 2>/dev/null || true
+		fi
+	done
+	
 	sleep 30
+	ITERATION=$((ITERATION + 1))
 	COUNTER=$(kubectl get managed --no-headers \
 		| grep -v database | grep -v object | grep -v release \
 		| wc -l)
 done
+
+if [ $COUNTER -ne 0 ]; then
+	echo "Warning: $COUNTER resources still exist after maximum wait time."
+	echo "You may need to manually delete them or check for deletion protection issues."
+	kubectl get managed --no-headers | grep -v database | grep -v object | grep -v release
+	exit 1
+fi
 
 if [[ "$HYPERSCALER" == "google" ]]; then
 
