@@ -12,7 +12,8 @@ kind: SQL
 metadata:
   name: my-db
 spec:
-  compositionSelector:
-    matchLabels:
-      provider: google
-      db: postgresql
+  crossplane:
+    compositionSelector:
+      matchLabels:
+        provider: google
+        db: postgresql

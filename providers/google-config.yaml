@@ -4,7 +4,7 @@ kind: ClusterProviderConfig
 metadata:
   name: default
 spec:
-  projectID: dot-20260207210133
+  projectID: dot-20260208073646
   credentials:
     source: Secret
     secretRef:
